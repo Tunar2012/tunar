@@ -209,9 +209,10 @@ document.getElementById('img').addEventListener('change', function () {
     document.getElementById('displayImage').src = this.value
 })
 let saveChangesBtn = document.getElementById('btnSave')
-saveChangesBtn.addEventListener('click', function () {
+saveChangesBtn.addEventListener('click', function (event) {
     event.preventDefault(); // Prevents default behavior (useful if inside a form)
 
+    // Get updated data from the input fields
     let nameOfCompEdit = document.getElementById("namei").value;
     let priceOfCompEdit = document.getElementById("pricei").value;
     let imageOfCompEdit = document.getElementById("imgi").value;
@@ -223,26 +224,41 @@ saveChangesBtn.addEventListener('click', function () {
     let phoneOfCompEdit = document.getElementById("phonei").value;
     let descriptionOfCompEdit = document.getElementById("descriptioni").value;
 
+    // Get the index of the row being edited
     let rowIndex = document.getElementById("btnSave").getAttribute("liniyaninIndexi");
 
-    let table = document.getElementById('myTable')
+    // Ensure the rowIndex is valid before proceeding
+    if (rowIndex === null || rowIndex === undefined) {
+        console.error("Row index is not valid.");
+        return;
+    }
 
-    let row = table.rows[rowIndex - 1]
-    console.log(row)
-    row.querySelector('.nameOfComp').textContent = nameOfCompEdit
-    row.querySelector('.priceOfComp').textContent = priceOfCompEdit
-        console.log(priceOfCompEdit)
-    row.querySelector('.la').src = imageOfCompEdit
-    row.querySelector('.zipcodeOfComp').textContent = zipcodeOfCompEdit
-    row.querySelector('.stateOfComp').textContent = stateOfCompEdit
-    row.querySelector('.cityOfComp').textContent = cityOfCompEdit
-    row.querySelector('.sizeOfComp').textContent = sizeOfCompEdit
-    row.querySelector('.emailOfComp').textContent = emailOfCompEdit
-    row.querySelector('.phoneOfComp').textContent = phoneOfCompEdit
-    row.querySelector('.descriptionOfComp').textContent = descriptionOfCompEdit
+    // Parse the array from localStorage
+    let localnoe = JSON.parse(localStorage.getItem('array'));
 
-    let localnoe = JSON.parse(localStorage.getItem('array'))
-    localnoe[rowIndex - 1] = {
+
+
+    // Update the table row with the new values
+    let row = document.getElementById('myTable').rows[rowIndex];
+    if (row) {
+        // Update each column of the row with the new values
+        row.querySelector('.nameOfComp').textContent = nameOfCompEdit;
+        row.querySelector('.priceOfComp').textContent = priceOfCompEdit;
+        row.querySelector('.la').src = imageOfCompEdit;
+        // row.querySelector('.zipcodeOfComp').textContent = zipcodeOfCompEdit;
+        // row.querySelector('.stateOfComp').textContent = stateOfCompEdit;
+        // row.querySelector('.cityOfComp').textContent = cityOfCompEdit;
+        // row.querySelector('.sizeOfComp').textContent = sizeOfCompEdit;
+        // row.querySelector('.emailOfComp').textContent = emailOfCompEdit;
+        // row.querySelector('.phoneOfComp').textContent = phoneOfCompEdit;
+        // row.querySelector('.descriptionOfComp').textContent = descriptionOfCompEdit;
+    } else {
+        console.error("Row not found in table.");
+        return;
+    }
+
+    // Update the localStorage array with the new values
+    localnoe[rowIndex] = {
         nam: nameOfCompEdit,
         price: priceOfCompEdit,
         email: emailOfCompEdit,
@@ -253,9 +269,17 @@ saveChangesBtn.addEventListener('click', function () {
         city: cityOfCompEdit,
         img: imageOfCompEdit,
         phone: phoneOfCompEdit,
-    },
-        localStorage.setItem('array', JSON.stringify(localnoe))
-})
+    };
+
+    // Save the updated array back to localStorage
+    localStorage.setItem('array', JSON.stringify(localnoe));
+
+    // Optionally, you can hide or close the modal after saving the changes
+    // Example: Close the modal
+    $('#exampleModal3').modal('hide');
+});
+
+
 let filterSelect = document.getElementById('filterSelect')
 filterSelect.addEventListener('change', function () {
     let sortedArray = array.slice(); 
