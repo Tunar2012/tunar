@@ -113,6 +113,24 @@ let array = [
 let list = ["All", "MacBook", "HP", "ASUS", "Lenovo", "Huawei", "Samsung"];
 const unitedArrays = [...array, ...storage];
 
+
+
+// searchInput funtion to filter the data 
+
+// Adding the search functionality
+document.querySelector('#searchInput').addEventListener('input', function(event) {
+    let searchQuery = event.target.value.toLowerCase();
+
+    // Filter products based on the search query (case insensitive)
+    let filteredProducts = unitedArrays.filter(product => 
+        product.nam.toLowerCase().includes(searchQuery) ||
+        product.description.toLowerCase().includes(searchQuery) ||
+        product.email.toLowerCase().includes(searchQuery) // You can add more fields here
+    );
+
+    // Render the filtered products
+    renderProducts(filteredProducts);
+});
 // Render product cards efficiently
 function renderProducts(products) {
     let htmlContent = "";
