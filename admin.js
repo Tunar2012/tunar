@@ -83,6 +83,7 @@ size.change(function () {
     }
 })
 $("#btnn").click(function () {
+    let id = Date.now();
     let nam = $("#name");
     let price = $("#price");
     let email = $("#email");
@@ -94,6 +95,7 @@ $("#btnn").click(function () {
     let img = $("#img");
     let description = $("#description");
     let newCard = {
+        id: id,
         nam: nam.val(),
         price: price.val(),
         email: email.val(),
@@ -105,8 +107,21 @@ $("#btnn").click(function () {
         img: img.val(),
         description: description.val()
     }
-    array.push(newCard)
-    localStorage.setItem('array', JSON.stringify(array))
+    let array = JSON.parse(localStorage.getItem('array')) || [];
+
+    // Check if the post with the same ID already exists and update it
+    let indexToUpdate = array.findIndex(item => item.id === id);
+    if (indexToUpdate !== -1) {
+        // Replace the old post with the new one
+        array[indexToUpdate] = newCard;
+    } else {
+        // If no existing post with this ID, add the new one to the array
+        array.push(newCard);
+    }
+
+    // Save the updated array back to localStorage
+    localStorage.setItem('array', JSON.stringify(array));
+
     window.location.href = 'admin.html'
 })
 function renderTable(data) {
@@ -115,8 +130,8 @@ function renderTable(data) {
 
     data.forEach((element, index) => {
         let row = `
-            <tr>
-                <td>${index + 1}</td>
+            <tr id=${index + 1}>
+                <td class='idOfComp'>${element.id}</td>
                 <td class='nameOfComp'>${element.nam}</td>
                 <td>     
                     <button type="button" id="btnw" class="btn btn-danger viewImageButton" data-bs-toggle="modal" data-bs-target="#exampleModal2">
@@ -142,33 +157,6 @@ function renderTable(data) {
 
 }
 renderTable(array)
-// array.forEach((element, index) => {
-//     let ii = `
-//           <tr>
-//                 <td>${index + 1}</td>
-//                 <td class='nameOfComp'>${element.nam}</td>
-//                 <td>     
-//                     <button type="button" id="btnw" class="btn  btn-danger viewImageButton" data-bs-toggle="modal" data-bs-target="#exampleModal2">
-//                         <img src="${element.img}" alt="" class="la" style="width: 100px;">
-//                     </button>                       
-//                 </td>
-//                 <td class='priceOfComp'>${element.price}</td>
-//                    <td class='zipcodeOfComp d-none'>${element.zipcode}</td>   
-//                    <td class='emailOfComp d-none'>${element.email}</td>
-//                    <td class='descriptionOfComp d-none'>${element.description}</td>
-//                    <td class='phoneOfComp d-none'>${element.phone}</td>   
-//                    <td class='cityOfComp d-none'>${element.city}</td>
-//                    <td class='stateOfComp d-none'>${element.state}</td>
-//                    <td class='sizeOfComp d-none'>${element.size}</td>   
-
-//                 <td>
-//                     <button class="btn btn-warning edit" data-bs-toggle="modal" data-bs-target="#exampleModal3">edit</button>
-//                     <button class="btn btn-danger deleteBtn" >delete</button>
-//                 </td>
-//           </tr>
-// `
-//     document.querySelector('tbody').innerHTML += ii
-// });
 let viewImageButtons = document.querySelectorAll('.viewImageButton')
 viewImageButtons.forEach(btn => {
     btn.addEventListener('click', function () {
@@ -176,109 +164,90 @@ viewImageButtons.forEach(btn => {
         document.getElementById('aura').src = btn.querySelector('.la').src
     })
 })
-let editButtons = document.querySelectorAll('.edit')
+let editButtons = document.querySelectorAll('.edit');
 editButtons.forEach(edit => {
     edit.addEventListener('click', function () {
-        let ter = this.parentElement.parentElement
-        $("#pricei").val(ter.querySelector('.priceOfComp').textContent)
-        $("#namei").val(ter.querySelector('.nameOfComp').textContent)
-        $("#emaili").val(ter.querySelector('.emailOfComp').textContent)
-        $("#zipcodei").val(ter.querySelector('.zipcodeOfComp').textContent)
-        $("#imgi").val(ter.querySelector('.la').src)
-        $("#sizei").val(ter.querySelector('.sizeOfComp').textContent)
-        $("#phonei").val(ter.querySelector('.phoneOfComp').textContent)
-        $("#cityi").val(ter.querySelector('.cityOfComp').textContent)
-        $("#descriptioni").val(ter.querySelector('.descriptionOfComp').textContent)
-        $("#statei").val(ter.querySelector('.stateOfComp').textContent)
+        let ter = this.parentElement.parentElement;
+        let idOfCompEdit = ter.querySelector('.idOfComp').textContent;
+        $("#idi").attr('data-id', idOfCompEdit);
+
+        $("#pricei").val(ter.querySelector('.priceOfComp').textContent);
+        $("#namei").val(ter.querySelector('.nameOfComp').textContent);
+        $("#emaili").val(ter.querySelector('.emailOfComp').textContent);
+        $("#zipcodei").val(ter.querySelector('.zipcodeOfComp').textContent);
+        $("#imgi").val(ter.querySelector('.la').src);
+        $("#sizei").val(ter.querySelector('.sizeOfComp').textContent);
+        $("#phonei").val(ter.querySelector('.phoneOfComp').textContent);
+        $("#cityi").val(ter.querySelector('.cityOfComp').textContent);
+        $("#descriptioni").val(ter.querySelector('.descriptionOfComp').textContent);
+        $("#statei").val(ter.querySelector('.stateOfComp').textContent);
+
         document.getElementById("btnSave").setAttribute("liniyaninIndexi", ter.rowIndex);
-    })
-})
-let deleteq = document.querySelectorAll('.deleteBtn')
-console.log(deleteq);
-deleteq.forEach(fe => {
+    });
+});
+// Handling delete button
+let deleteButtons = document.querySelectorAll('.deleteBtn');
+deleteButtons.forEach(fe => {
     fe.addEventListener('click', function () {
-        let nameOfComp = this.parentElement.parentElement.querySelector('.nameOfComp').textContent
-        console.log(nameOfComp);
-        let local = JSON.parse(localStorage.getItem('array')) || []
-        let uptatedArray = local.filter(item => item.nam !== nameOfComp)
-        localStorage.setItem('array', JSON.stringify(uptatedArray))
-        this.parentElement.parentElement.remove()
-    })
-})
+        let idOfComp = this.parentElement.parentElement.querySelector('.idOfComp').textContent;
+        let local = JSON.parse(localStorage.getItem('array')) || [];
+        let updatedArray = local.filter(item => item.id !== parseInt(idOfComp));
+        localStorage.setItem('array', JSON.stringify(updatedArray));
+        this.parentElement.parentElement.remove();
+    });
+});
+
+
+// Save changes after editing
+let saveChangesBtn = document.getElementById('btnSave');
+saveChangesBtn.addEventListener('click', function (event) {
+    event.preventDefault(); // Prevent form submission
+
+    // Get updated data from the form fields
+    let idOfCompEdit = $("#idi").attr("data-id");
+    let nameOfCompEdit = $("#namei").val();
+    let priceOfCompEdit = $("#pricei").val();
+    let imageOfCompEdit = $("#imgi").val();
+    let zipcodeOfCompEdit = $("#zipcodei").val();
+    let stateOfCompEdit = $("#statei").val();
+    let cityOfCompEdit = $("#cityi").val();
+    let sizeOfCompEdit = $("#sizei").val();
+    let emailOfCompEdit = $("#emaili").val();
+    let phoneOfCompEdit = $("#phonei").val();
+    let descriptionOfCompEdit = $("#descriptioni").val();
+
+    // Find and update the specific object in the array by matching the ID
+    let array = JSON.parse(localStorage.getItem('array')) || [];
+    let indexToUpdate = array.findIndex(item => item.id === parseInt(idOfCompEdit));
+
+    if (indexToUpdate !== -1) {
+        array[indexToUpdate] = {
+            id: parseInt(idOfCompEdit),
+            nam: nameOfCompEdit,
+            price: priceOfCompEdit,
+            email: emailOfCompEdit,
+            zipcode: zipcodeOfCompEdit,
+            state: stateOfCompEdit,
+            size: sizeOfCompEdit,
+            description: descriptionOfCompEdit,
+            city: cityOfCompEdit,
+            img: imageOfCompEdit,
+            phone: phoneOfCompEdit
+        };
+
+        // Save the updated array back to localStorage
+        localStorage.setItem('array', JSON.stringify(array));
+
+        // Refresh table
+        renderTable(array);
+        $('#exampleModal3').modal('hide');
+    }
+});
+
+// image preview
 document.getElementById('img').addEventListener('change', function () {
     document.getElementById('displayImage').src = this.value
 })
-let saveChangesBtn = document.getElementById('btnSave')
-saveChangesBtn.addEventListener('click', function (event) {
-    event.preventDefault(); // Prevents default behavior (useful if inside a form)
-
-    // Get updated data from the input fields
-    let nameOfCompEdit = document.getElementById("namei").value;
-    let priceOfCompEdit = document.getElementById("pricei").value;
-    let imageOfCompEdit = document.getElementById("imgi").value;
-    let zipcodeOfCompEdit = document.getElementById("zipcodei").value;
-    let stateOfCompEdit = document.getElementById("statei").value;
-    let cityOfCompEdit = document.getElementById("cityi").value;
-    let sizeOfCompEdit = document.getElementById("sizei").value;
-    let emailOfCompEdit = document.getElementById("emaili").value;
-    let phoneOfCompEdit = document.getElementById("phonei").value;
-    let descriptionOfCompEdit = document.getElementById("descriptioni").value;
-
-    // Get the index of the row being edited
-    let rowIndex = document.getElementById("btnSave").getAttribute("liniyaninIndexi");
-
-    // Ensure the rowIndex is valid before proceeding
-    if (rowIndex === null || rowIndex === undefined) {
-        console.error("Row index is not valid.");
-        return;
-    }
-
-    // Parse the array from localStorage
-    let localnoe = JSON.parse(localStorage.getItem('array'));
-
-
-
-    // Update the table row with the new values
-    let row = document.getElementById('myTable').rows[rowIndex];
-    if (row) {
-        // Update each column of the row with the new values
-        row.querySelector('.nameOfComp').textContent = nameOfCompEdit;
-        row.querySelector('.priceOfComp').textContent = priceOfCompEdit;
-        row.querySelector('.la').src = imageOfCompEdit;
-        // row.querySelector('.zipcodeOfComp').textContent = zipcodeOfCompEdit;
-        // row.querySelector('.stateOfComp').textContent = stateOfCompEdit;
-        // row.querySelector('.cityOfComp').textContent = cityOfCompEdit;
-        // row.querySelector('.sizeOfComp').textContent = sizeOfCompEdit;
-        // row.querySelector('.emailOfComp').textContent = emailOfCompEdit;
-        // row.querySelector('.phoneOfComp').textContent = phoneOfCompEdit;
-        // row.querySelector('.descriptionOfComp').textContent = descriptionOfCompEdit;
-    } else {
-        console.error("Row not found in table.");
-        return;
-    }
-
-    // Update the localStorage array with the new values
-    localnoe[rowIndex] = {
-        nam: nameOfCompEdit,
-        price: priceOfCompEdit,
-        email: emailOfCompEdit,
-        zipcode: zipcodeOfCompEdit,
-        state: stateOfCompEdit,
-        size: sizeOfCompEdit,
-        description: descriptionOfCompEdit,
-        city: cityOfCompEdit,
-        img: imageOfCompEdit,
-        phone: phoneOfCompEdit,
-    };
-
-    // Save the updated array back to localStorage
-    localStorage.setItem('array', JSON.stringify(localnoe));
-
-    // Optionally, you can hide or close the modal after saving the changes
-    // Example: Close the modal
-    $('#exampleModal3').modal('hide');
-});
-
 
 let filterSelect = document.getElementById('filterSelect')
 filterSelect.addEventListener('change', function () {
